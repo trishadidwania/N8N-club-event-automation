@@ -1,0 +1,1182 @@
+{
+  "name": "N8N BLOG AUTOMATION FINAL WORKFLOW",
+  "nodes": [
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841479947003383",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "caption",
+                "value": "={{ $json.captionText }}"
+              },
+              {
+                "name": "Node",
+                "value": "17841479947003383"
+              },
+              {
+                "name": "image_url",
+                "value": "https://dummyimage.com/1080x1080/000/fff.jpg"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -2352,
+        400
+      ],
+      "id": "c84f66e6-f72d-4c94-bc6b-3419d3845d02",
+      "name": "Instagram Container ID",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "rKI6RgTDQZhTa3sI",
+          "name": "Facebook Graph account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17841479947003383",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "=https://dummyimage.com/1080x1080/000/fff.jpg"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Instagram Format').item.json.caption }}"
+              },
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -1952,
+        400
+      ],
+      "id": "eb3c1e96-b2bc-436d-b425-278e8c9377d6",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "rKI6RgTDQZhTa3sI",
+          "name": "Facebook Graph account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "865422326663513",
+        "recipientPhoneNumber": "+919106672356",
+        "textBody": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -2320,
+        656
+      ],
+      "id": "78d49ebd-b048-4fe1-95d8-5feb32db5c6e",
+      "name": "Send message",
+      "webhookId": "f9c19a3b-3b9c-49c7-ba92-9ef7214de468",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "xjxTDJn8tR8nVOse",
+          "name": "WhatsApp account 7"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const event = $json;\n\n// Safe number handling (even if not string)\nconst phone =\n  event[\"Organizer Phone number\"]\n    ? String(event[\"Organizer Phone number\"])\n    : \"\";\n\nconst fee =\n  event[\"Registration fee(₹)\"]\n    ? Number(event[\"Registration fee(₹)\"])\n    : 0;\n\n// Hashtag mapping\nconst eventHashtags = {\n  Cultural: \"#CollegeEvent #CulturalFest #CampusLife\",\n  Technical: \"#TechEvent #Hackathon #Innovation\",\n  Sports: \"#SportsMeet #CollegeSports #GameOn\",\n};\n\nconst hashtags =\n  eventHashtags[event[\"Type of event\"]] ||\n  \"#CollegeEvent\";\n\n// Instagram caption\nreturn [\n  {\n    json: {\n      caption: `\n🎉 ${event[\"Event Name\"]} 🎉\n\n🏫 Club: ${event[\"Club name\"]}\n📅 Date: ${event[\"Date\"]}\n⏰ Time: ${event[\"Start Time\"]} - ${event[\"End Time\"]}\n📍 Venue: ${event[\"Venue\"]}\n\n📝 ${event[\"Description\"]}\n\n📞 Contact: ${phone}\n💰 Registration Fee: ₹${fee}\n\n${hashtags}\n`.trim(),\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2768,
+        400
+      ],
+      "id": "7b3fb615-bd79-442c-9e3c-da0f8c5e4f19",
+      "name": "Instagram Format"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const event = item.json;\n\n  const phone = event[\"Organizer Phone number\"]\n    ? String(event[\"Organizer Phone number\"])\n    : \"Not provided\";\n\n  const fee = event[\"Registration fee(₹)\"]\n    ? Number(event[\"Registration fee(₹)\"])\n    : 0;\n\n  return {\n    json: {\n      message: `🎉 *${event[\"Event Name\"]}* 🎉\n\n🏫 Club: ${event[\"Club name\"]}\n📅 Date: ${event[\"Date\"]}\n⏰ Time: ${event[\"Start Time\"]} - ${event[\"End Time\"]}\n📍 Venue: ${event[\"Venue\"]}\n\n📝 ${event[\"Description\"]}\n\n📞 Contact: ${phone}\n💰 Registration Fee: ₹${fee}`\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2752,
+        656
+      ],
+      "id": "8693ffa5-7712-44fc-8ce2-60195d5654dd",
+      "name": "Whatsapp Format"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1840,
+        656
+      ],
+      "id": "6636390b-51c6-41c5-86e4-1f5c6e935c18",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "captionText",
+              "value": "={{ $json.caption }}"
+            },
+            {
+              "name": "Node",
+              "value": "17841479103427657"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Image & Caption",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -2528,
+        400
+      ],
+      "id": "3bd643b0-eeb5-4039-837b-011f8839187a"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU",
+          "mode": "list",
+          "cachedResultName": "N8N CLUB EVENTS INFO",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1269532800,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU/edit#gid=1269532800"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4240,
+        336
+      ],
+      "id": "5a87c347-40d4-4fcb-8d65-77e8f2ad99a3",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "IcW5z4U8r7ujayji",
+          "name": "Google Sheets Trigger account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU",
+          "mode": "list",
+          "cachedResultName": "N8N CLUB EVENTS INFO",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1269532800,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UypipiMfESI6XvG8BTt5XJxcNkr2QqxfqeEaSzmUxjU/edit#gid=1269532800"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Event id": "={{ $json[\"Event id\"] }}",
+            "Description": "={{ $json.Description }}",
+            "Club name": "={{ $json[\"Club name\"] }}",
+            "Event Name": "={{ $json[\"Event Name\"] }}",
+            "Type of event": "={{ $json[\"Type of event\"] }}",
+            "Start Time": "={{ $json[\"Start Time\"] }}",
+            "End Time": "={{ $json[\"End Time\"] }}",
+            "Venue": "={{ $json.Venue }}",
+            "Timestamp": "={{ $json.Timestamp }}",
+            "Team members": "={{ $json[\"Team members\"] }}",
+            "Prize ": "={{ $json[\"Prize \"] }}",
+            "Chief guest ": "={{ $json[\"Chief guest \"] }}",
+            "Images\n⚠️ Image Visibility Required\nPlease make sure your uploaded image is set to Public (Anyone with the link – Viewer) in Google Drive.\nImages with restricted access will not be considered.  ": "=",
+            "Date": "={{ $json.Date }}"
+          },
+          "matchingColumns": [
+            "Event id"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event id",
+              "displayName": "Event id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Club name",
+              "displayName": "Club name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event Name",
+              "displayName": "Event Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type of event",
+              "displayName": "Type of event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Start Time",
+              "displayName": "Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Time",
+              "displayName": "End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Venue",
+              "displayName": "Venue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Team members",
+              "displayName": "Team members",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Registration fee(₹)",
+              "displayName": "Registration fee(₹)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Prize ",
+              "displayName": "Prize ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Chief guest ",
+              "displayName": "Chief guest ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Images\n⚠️ Image Visibility Required\nPlease make sure your uploaded image is set to Public (Anyone with the link – Viewer) in Google Drive.\nImages with restricted access will not be considered.  ",
+              "displayName": "Images\n⚠️ Image Visibility Required\nPlease make sure your uploaded image is set to Public (Anyone with the link – Viewer) in Google Drive.\nImages with restricted access will not be considered.  ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Organizer Name",
+              "displayName": "Organizer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Organizer Phone number",
+              "displayName": "Organizer Phone number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3824,
+        320
+      ],
+      "id": "b41ae3f1-3cf8-4c4a-a09a-c6ae80603315",
+      "name": "Append or update row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "doSlqGYsogtEURgX",
+          "name": "Google Sheets account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a16caaaf-ba77-430b-80a6-ba57740df655",
+              "leftValue": "={{ $json[\"Event id\"] }}",
+              "rightValue": "_ _ _ _",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "672f623e-f4be-4ff0-b780-20831840a3fa",
+              "leftValue": "={{ $json[\"Event Name\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8162634e-3e25-45e1-a761-8f9aabd9ea3d",
+              "leftValue": "={{ $json.Date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4048,
+        336
+      ],
+      "id": "f8eb7bf0-8983-45b8-945d-1a83454cebb4",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nfunction parseDate(dateStr) {\n  if (!dateStr) return new Date(0);\n\n  // DD/MM/YYYY\n  if (dateStr.includes('/')) {\n    const [day, month, year] = dateStr.split('/');\n    return new Date(`${year}-${month}-${day}`);\n  }\n\n  // YYYY-MM-DD\n  return new Date(dateStr);\n}\n\nitems.sort((a, b) => {\n  return parseDate(a.json.Date) - parseDate(b.json.Date);\n});\n\nreturn items;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3648,
+        320
+      ],
+      "id": "ed26345b-4e86-4abe-a493-a7ba0328d6a3",
+      "name": "Sort By Event Date1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const grouped = {};\n\n$input.all().forEach(e => {\n  // grouping key (use exact sheet header)\n  const type = e.json[\"Type of event\"] || e.json.TypeOfEvent || e.json.type || \"Uncategorized\";\n\n  if (!grouped[type]) grouped[type] = [];\n\n  grouped[type].push({\n    // Use exact headings as object keys (strings) so downstream nodes/Sheets see exact column names\n    \"Event id\": e.json[\"Event id\"] || e.json.eventId || e.json.event_id || \"\",\n    \"Club name\": e.json[\"Club name\"] || e.json.clubName || e.json.club_name || \"\",\n    \"Event Name\": e.json[\"Event Name\"] || e.json.eventName || e.json.Event_Name || \"\",\n    \"Type of event\": e.json[\"Type of event\"] || e.json.TypeOfEvent || e.json.type || \"\",\n    \"Date\": e.json[\"Date\"] || e.json.date || e.json.dateOfEvent || \"\",\n    \"Start Time\": e.json[\"Start Time\"] || e.json.startTime || e.json.timeOfEvent || \"\",\n    \"End Time\": e.json[\"End Time\"] || e.json.endTime || \"\",\n    \"Venue\": e.json[\"Venue\"] || e.json.venue || \"\",\n    \"Team members\": e.json[\"Team members\"] || e.json.teamMembers || e.json.team_members || \"\",\n    \"Registration fee(₹)\": e.json[\"Registration fee(₹)\"] || e.json.registrationFee || e.json.registration_fee || \"\",\n    \"Prize\": e.json[\"Prize\"] || e.json.prize || \"\",\n    \"Chief guest\": e.json[\"Chief guest\"] || e.json.chiefGuest || e.json.chief_guest || \"\",\n    \"Description\": e.json[\"Description\"] || e.json.description || \"\",\n    \"Images\": e.json[\"Images\"] || e.json.images || e.json.image || \"\",\n    \"Organizer Name\": e.json[\"Organizer Name\"] || e.json.organizerName || e.json.organizer_name || \"\",\n    \"Organizer Phone number\": e.json[\"Organizer Phone number\"] || e.json.organizerPhone || e.json.organizer_phone || \"\"\n  });\n});\n\nreturn Object.entries(grouped).map(([typeOfEvent, events]) => ({\n  json: {\n    \"Type of event\": typeOfEvent,\n    events\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3424,
+        160
+      ],
+      "id": "f89cef8d-58fa-4a33-a298-063b7b559f41",
+      "name": "Sort By Category1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ---------- helpers (no external modules) ----------\n\nfunction parseDateParts(s) {\n  if (!s) return null;\n  s = String(s).trim();\n  let m = s.match(/^(\\d{4})[-\\/](\\d{1,2})[-\\/](\\d{1,2})$/);\n  if (m) return { y: +m[1], m: +m[2], d: +m[3] };\n\n  const parts = s.split(/[-\\/]/).map(p => p.trim());\n  if (parts.length === 3) {\n    let [p1, p2, p3] = parts;\n    if (/^\\d{4}$/.test(p1)) return { y: +p1, m: +p2, d: +p3 };\n    let d = p1, mth = p2, y = p3;\n    if (y.length === 2) y = '20' + y;\n    return { y: +y, m: +mth, d: +d };\n  }\n\n  const dt = new Date(s);\n  if (!isNaN(dt)) return { y: dt.getFullYear(), m: dt.getMonth() + 1, d: dt.getDate() };\n\n  return null;\n}\n\nfunction parseTimeParts(t) {\n  if (!t) return { hh: 0, mm: 0, ss: 0 };\n  t = String(t).trim();\n  const m24 = t.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?$/);\n  if (m24) return { hh: +m24[1], mm: +m24[2], ss: +(m24[3] || 0) };\n\n  const m12 = t.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?\\s*(AM|PM)$/i);\n  if (m12) {\n    let hh = +m12[1], mm = +m12[2], ss = +(m12[3] || 0);\n    const ampm = m12[4].toUpperCase();\n    if (ampm === 'PM' && hh < 12) hh += 12;\n    if (ampm === 'AM' && hh === 12) hh = 0;\n    return { hh, mm, ss };\n  }\n  return { hh: 0, mm: 0, ss: 0 };\n}\n\nfunction buildLocalDate(dateStr, timeStr) {\n  const p = parseDateParts(dateStr);\n  if (!p) return null;\n  const t = parseTimeParts(timeStr);\n  return new Date(p.y, p.m - 1, p.d, t.hh || 0, t.mm || 0, t.ss || 0, 0);\n}\n\n// ---------- main ----------\n\nconst items = $items();\nconst now = new Date();\nconst ms = 24 * 60 * 60 * 1000;\n\nconst nextWeek = [];\nconst nextMonth = [];\nconst nextTwoMonths = [];\n\nitems.forEach(it => {\n  // Read date/time from the sheet — primary exact headings used first\n  const dateRaw = (\n    it.json[\"Date\"] ||\n    it.json.Date ||\n    it.json.date ||\n    it.json.dateOfEvent ||\n    \"\"\n  ).toString().trim();\n\n  // prefer \"Start Time\" for event start; fallback to timeOfEvent or time\n  const startTimeRaw = (\n    it.json[\"Start Time\"] ||\n    it.json[\"StartTime\"] ||\n    it.json.startTime ||\n    it.json.timeOfEvent ||\n    it.json.time ||\n    \"\"\n  ).toString().trim();\n\n  // optional end time\n  const endTimeRaw = (\n    it.json[\"End Time\"] ||\n    it.json[\"EndTime\"] ||\n    it.json.endTime ||\n    \"\"\n  ).toString().trim();\n\n  if (!dateRaw) return; // skip rows without a Date\n\n  const eventDate = buildLocalDate(dateRaw, startTimeRaw);\n  if (!eventDate || isNaN(eventDate)) return;\n\n  const diffMs = eventDate.getTime() - now.getTime();\n  const diffDays = Math.floor(diffMs / ms);\n\n  // Build event object using the exact headings provided\n  const eventObj = {\n    \"Event id\": it.json[\"Event id\"] || it.json.eventId || it.json.event_id || \"\",\n    \"Club name\": it.json[\"Club name\"] || it.json.clubName || it.json.Club_Name || \"\",\n    \"Event Name\": it.json[\"Event Name\"] || it.json.eventName || it.json.Event_Name || \"\",\n    \"Type of event\": it.json[\"Type of event\"] || it.json.TypeOfEvent || it.json.type || \"\",\n    \"Date\": dateRaw,\n    \"Start Time\": startTimeRaw,\n    \"End Time\": endTimeRaw,\n    \"Venue\": it.json[\"Venue\"] || it.json.venue || \"\",\n    \"Team members\": it.json[\"Team members\"] || it.json.teamMembers || it.json.team_members || \"\",\n    \"Registration fee(₹)\": it.json[\"Registration fee(₹)\"] || it.json.registrationFee || it.json.registration_fee || \"\",\n    \"Prize\": it.json[\"Prize\"] || it.json.prize || \"\",\n    \"Chief guest\": it.json[\"Chief guest\"] || it.json.chiefGuest || it.json.chief_guest || \"\",\n    \"Description\": it.json[\"Description\"] || it.json.description || \"\",\n    \"Images\": it.json[\"Images\"] || it.json.images || it.json.image || \"\",\n    \"Organizer Name\": it.json[\"Organizer Name\"] || it.json.organizerName || it.json.organizer_name || \"\",\n    \"Organizer Phone number\": it.json[\"Organizer Phone number\"] || it.json.organizerPhone || it.json.organizer_phone || \"\",\n    eventDateISO: eventDate.toISOString(),\n    diffDays\n  };\n\n  if (diffDays >= 0 && diffDays <= 7) {\n    nextWeek.push(eventObj);\n  } else if (diffDays >= 8 && diffDays <= 30) {\n    nextMonth.push(eventObj);\n  } else if (diffDays >= 31 && diffDays <= 60) {\n    nextTwoMonths.push(eventObj);\n  }\n});\n\n// Sort each list by parsed date ascending (uses eventDateISO)\nconst sortByDate = arr => arr.sort((a, b) => new Date(a.eventDateISO) - new Date(b.eventDateISO));\nsortByDate(nextWeek);\nsortByDate(nextMonth);\nsortByDate(nextTwoMonths);\n\n// Return grouped arrays\nreturn [\n  {\n    json: {\n      nextWeek,\n      nextMonth,\n      nextTwoMonths\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3472,
+        480
+      ],
+      "id": "e715a54e-17bc-49cd-b1fd-a9cc738773c5",
+      "name": "Upcoming Events1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();\n// n8n Code node (JavaScript)\n// Configure this node to have 4 outputs (or change the number of outputs below)\n// Output mapping (example):\n// 0 -> Create Google Calendar event node\n// 1 -> Send SMS / Telegram node\n// 2 -> Send Gmail node\n// 3 -> Send Slack node\n\n// Get all input items\nconst incoming = this.getInputData(); // n8n helper: array of { json: {...}, binary?: {...} }\n\nconst outCreateEvent = [];\nconst outText = [];\nconst outGmail = [];\nconst outSlack = [];\n\n// helper to format a date/time nicely (fallback to original if parse fails)\nfunction fmtDate(d) {\n  if (!d) return '';\n  try {\n    const dt = new Date(d);\n    if (Number.isNaN(dt.getTime())) return String(d);\n    return dt.toLocaleString(); // uses host locale; change to dt.toISOString() if you need ISO\n  } catch (e) {\n    return String(d);\n  }\n}\n\nfor (const item of incoming) {\n  const js = item.json || {};\n\n  // Common fields we try to extract. Adjust keys to match your Google Calendar / Sheets keys.\n  const title = js.summary || js.title || js.eventTitle || js.name || 'No title';\n  const description = js.description || js.notes || '';\n  const start = js.start?.dateTime || js.start || js.startTime || js.start_date || js.start_time;\n  const end = js.end?.dateTime || js.end || js.endTime || js.end_date || js.end_time;\n  const location = js.location || js.place || '';\n  // possible contact fields (sheet may contain these)\n  const toEmail = js.email || js.toEmail || js.userEmail || js.ownerEmail || undefined;\n  const chatId = js.chatId || js.telegramChatId || js.phone || undefined;\n  const slackChannel = js.slackChannel || js.channel || undefined;\n\n  // Build a plain text message\n  const messageTextParts = [\n    `*${title}*`,\n    start ? `When: ${fmtDate(start)}` : '',\n    end ? `Until: ${fmtDate(end)}` : '',\n    location ? `Where: ${location}` : '',\n    description ? `Details: ${description}` : ''\n  ].filter(Boolean);\n\n  const messageText = messageTextParts.join('\\n');\n\n  // --- Output for Create Calendar Event node ---\n  // Many calendar nodes expect a JSON with \"summary\", \"start\", \"end\", \"description\", \"location\", \"attendees\" etc.\n  outCreateEvent.push({\n    json: {\n      summary: title,\n      description,\n      location,\n      start: (start ? { dateTime: (new Date(start)).toISOString() } : undefined),\n      end:   (end   ? { dateTime: (new Date(end)).toISOString() }   : undefined),\n      // attendees: [{email: toEmail}] // uncomment if you want to pass attendees\n    }\n  });\n\n  // --- Output for Text / Telegram / SMS node ---\n  // Many messaging nodes expect { chatId, text } (or { to, message } for SMS providers).\n  outText.push({\n    json: {\n      chatId,             // if your Telegram node expects chatId here\n      phone: chatId,      // or if it's an SMS node expecting phone\n      text: messageText,\n      rawInput: js        // pass original data for debugging if needed\n    }\n  });\n\n  // --- Output for Gmail node ---\n  // Gmail node often expects: { to, subject, html/text }\n  outGmail.push({\n    json: {\n      to: toEmail || '',   // if blank, Gmail \"Send\" node may use \"me\" depending on config\n      subject: `Reminder: ${title}`,\n      text: messageText,\n      html: `<p>${messageText.replace(/\\n/g, '<br/>')}</p>`\n    }\n  });\n\n  // --- Output for Slack node ---\n  // Slack node usually accepts channel and text (or blocks). Adjust to your node type.\n  outSlack.push({\n    json: {\n      channel: slackChannel || '#general',\n      text: messageText,\n      attachments: [],     // optional: map more structured data into attachments/blocks\n      original: js\n    }\n  });\n}\n\n// Return arrays in the exact order of node outputs\nreturn [outCreateEvent, outText, outGmail, outSlack];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2544,
+        128
+      ],
+      "id": "4f5f57ad-f48b-4a0c-955b-11d8dd2fe63d",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "srisha.patra@gmail.com",
+        "subject": "Events",
+        "emailType": "text",
+        "message": "New event added!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1984,
+        224
+      ],
+      "id": "2bb795a1-deb4-4c58-9fa0-0ece04a0165a",
+      "name": "Send a message2",
+      "webhookId": "d266292f-2293-41b6-9a94-777adcea2df7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZEpyPj3bnEmm2D5C",
+          "name": "Gmail account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 8
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "srisha.patra@gmail.com",
+          "mode": "list",
+          "cachedResultName": "srisha.patra@gmail.com"
+        },
+        "triggerOn": "eventCancelled",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2800,
+        -32
+      ],
+      "id": "921f39f3-87fd-4d08-a854-df09b64a83a7",
+      "name": "Google Calendar Trigger1",
+      "executeOnce": false,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "UkHkdLgEBc0QE54h",
+          "name": "Google Calendar account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "srisha.patra@gmail.com",
+        "subject": "Events",
+        "emailType": "text",
+        "message": "Event cancelled !",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -2320,
+        -32
+      ],
+      "id": "c4630f2e-22f2-4158-9cf9-7bf3287c029b",
+      "name": "Send a message3",
+      "webhookId": "1be19772-c268-40f9-8ca0-cb8b8fce36ed",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZEpyPj3bnEmm2D5C",
+          "name": "Gmail account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "srisha.patra@gmail.com",
+          "mode": "list",
+          "cachedResultName": "srisha.patra@gmail.com"
+        },
+        "start": "={{ $json.start.dateTime }}",
+        "end": "={{ $json.end.dateTime }}",
+        "additionalFields": {
+          "description": "={{\n\"📌 Event: \" + $json[\"Event Name\"] + \"\\n\\n\" +\n\"🏛 Club: \" + $json[\"Club name\"] + \"\\n\\n\" +\n\"📅 Date: \" + $json[\"Date\"] + \"\\n\" +\n\"🕘 Time: \" + $json[\"Start Time\"] + \" - \" + $json[\"End Time\"] + \"\\n\" +\n\"📍 Venue: \" + $json[\"Venue\"] + \"\\n\\n\" +\n\"📝 Description:\\n\" + $json[\"Description\"] + \"\\n\\n\" +\n\"👤 Organizer: \" + $json[\"Organizer Name\"] + \"\\n\" +\n\"📞 Contact: \" + $json[\"Organizer Phone number\"]\n}}\n",
+          "summary": "={{ $json[\"Event Name\"] + \" (\" + $json[\"Type of event\"] + \")\" }}\n"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -2304,
+        128
+      ],
+      "id": "c86c9b66-aaed-449c-8794-7fd7988be7ec",
+      "name": "Create an event2",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "UkHkdLgEBc0QE54h",
+          "name": "Google Calendar account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "865422326663513",
+        "recipientPhoneNumber": "+919106672356",
+        "textBody": "event added",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -2000,
+        80
+      ],
+      "id": "7c8dc5d7-84be-4c46-b463-4dbd08655aa5",
+      "name": "Send message3",
+      "webhookId": "30a11280-e9f1-45cf-9b02-c672c234c0ff",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "xjxTDJn8tR8nVOse",
+          "name": "WhatsApp account 7"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "30862a92ac86684e887f93a2ab4e29bcb83dcc321ad8ef50a13f96b296865eca@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "EVENTS"
+        },
+        "start": "={{ $json.Date + \"T\" + $json[\"Start Time\"] + \":00+05:30\" }}",
+        "end": "={{ $json.Date + \"T\" + $json[\"End Time\"] + \":00+05:30\" }}",
+        "additionalFields": {
+          "description": "={{ \"📌 Event: \" + $json[\"Event Name\"] + \"\\n\\n\" + \"🏛 Club: \" + $json[\"Club name\"] + \"\\n\\n\" + \"📅 Date: \" + $json[\"Date\"] + \"\\n\" + \"🕘 Time: \" + $json[\"Start Time\"] + \" - \" + $json[\"End Time\"] + \"\\n\" + \"📍 Venue: \" + $json[\"Venue\"] + \"\\n\\n\" + \"📝 Description:\\n\" + $json[\"Description\"] + \"\\n\\n\" + \"👤 Organizer: \" + $json[\"Organizer Name\"] + \"\\n\" + \"📞 Contact: \" + $json[\"Organizer Phone number\"] }}",
+          "summary": "={{ $json[\"Event Name\"] + \" (\" + $json[\"Type of event\"] + \")\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -2784,
+        128
+      ],
+      "id": "b87bdfd6-ec05-44e9-8d08-10c484b19826",
+      "name": "Create an event3",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "UkHkdLgEBc0QE54h",
+          "name": "Google Calendar account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "events",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        144
+      ],
+      "id": "c96306cd-d6df-4a9f-bed1-e5ea40b00fb0",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "nextWeek",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        368
+      ],
+      "id": "a1a71fd9-c6d0-4f0d-85b4-dad260784744",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "nextMonth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        544
+      ],
+      "id": "409d217d-8651-46ae-ad3a-f86b48ba8a6c",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "nextTwoMonths",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        704
+      ],
+      "id": "21159dcf-a511-4e86-a04b-2d3326a49347",
+      "name": "Split Out3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e5a2255e-bd1d-4b6f-afd3-9ce229331ae1",
+              "leftValue": "={{ $json.Date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1198d69b-17f6-4732-8ce0-2dd4d78e94ed",
+              "leftValue": "={{ $json[\"Start Time\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "676c6c4c-2d3c-4c4d-9d1b-15cc482fc279",
+              "leftValue": "={{ $json[\"End Time\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5eca71a3-74b7-4350-b22e-51cbcf5b4ba3",
+              "leftValue": "={{ $json[\"Event Name\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2976,
+        400
+      ],
+      "id": "19057760-74ea-4848-bf46-e03281817aa6",
+      "name": "If3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2128,
+        400
+      ],
+      "id": "afb908c7-e9b2-4c1d-8ac6-fb49958d90ee",
+      "name": "Wait",
+      "webhookId": "9f159e63-4ecb-4d94-a2f8-6b7f6ee045e8"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "865422326663513",
+        "recipientPhoneNumber": "+919106672356",
+        "textBody": "={{ $('Whatsapp Format').first().json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -2080,
+        656
+      ],
+      "id": "abfa7b94-7195-4cfb-9b2d-681580cf1a1e",
+      "name": "Send message1",
+      "webhookId": "f9c19a3b-3b9c-49c7-ba92-9ef7214de468",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "xjxTDJn8tR8nVOse",
+          "name": "WhatsApp account 7"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2544,
+        656
+      ],
+      "id": "d6a94b16-832a-4e5b-a9b1-3fa63a726de2",
+      "name": "Wait1",
+      "webhookId": "a3d9b202-976d-4e27-bbef-367607a729c1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Instagram Container ID": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message": {
+      "main": [
+        [
+          {
+            "node": "Send message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Format": {
+      "main": [
+        [
+          {
+            "node": "Set Image & Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whatsapp Format": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Image & Caption": {
+      "main": [
+        [
+          {
+            "node": "Instagram Container ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Sort By Event Date1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort By Event Date1": {
+      "main": [
+        [
+          {
+            "node": "Sort By Category1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upcoming Events1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort By Category1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upcoming Events1": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create an event2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event2": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out3": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Create an event3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instagram Format",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Whatsapp Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "e73f5665-6980-4d8a-82c6-b2e371431bfa",
+  "meta": {
+    "instanceId": "2258a5ad21fea25121c27d673d52db8c404d07fc8a25f449a08cb61ee5ead693"
+  },
+  "id": "VtgQzURgnT34aiSL",
+  "tags": []
+}
